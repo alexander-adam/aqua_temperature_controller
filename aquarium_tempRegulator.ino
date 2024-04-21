@@ -35,19 +35,22 @@ int temperatur=0;
 
 int b=0;
 
-int delTime=10000; 
+int delTime=60000; // one minute 
 
 
 //output for rele
 int rele=A5;
 
 //max temp before opening rele
-int kippunkt=19;
+int kippunkt = 18;
+bool coolerStopped = true;
 
 void  setup() {
   Serial.begin(9600);
   sensors.begin();
-  if (!sensors.getAddress(insideThermometer, 0)) Serial.println("Unable to find address for Device 0"); 
+  if (!sensors.getAddress(insideThermometer, 0)) {
+    Serial.println("Unable to find address for Device 0");
+  } 
   sensors.setResolution(insideThermometer, 9);
 
   int waterTempInt=printTemperature(insideThermometer);
@@ -70,7 +73,7 @@ void  setup() {
   pinMode(C6, OUTPUT);
   pinMode(C7,  OUTPUT);
   pinMode(C8, OUTPUT);
-//Turning all the LEDs off at the start  of the sketch
+  //Turning all the LEDs off at the start  of the sketch
   digitalWrite(R1,HIGH);
   digitalWrite(R2,HIGH);
   digitalWrite(R3,HIGH);
@@ -92,7 +95,7 @@ void  setup() {
 }
 
 
-void SelectRow(int row){
+void selectRow(int row){
   if (row==1)  digitalWrite(R1,LOW);
   if (row==2) digitalWrite(R2,LOW);
   if (row==3) digitalWrite(R3,LOW);
@@ -103,7 +106,7 @@ void SelectRow(int row){
   if (row==8) digitalWrite(R8,LOW);
 }
 
-void  SelectColumn(int column){
+void  selectColumn(int column){
   if (column==1) digitalWrite(C1,HIGH);
   if (column==2) digitalWrite(C2,HIGH);
   if (column==3)  digitalWrite(C3,HIGH);
@@ -148,33 +151,39 @@ int printTemperature(DeviceAddress deviceAddress)
 }
 
 void loop() {
-  if((temperatur/10%10)!=0){
+  // Temperature is higher than 10 (second_digit != 0). That means, two digits should be displayed.
+  if ((temperatur/10%10) != 0) {
     //Serial.println(temperatur);
-    int nmb1=temperatur%10;
-    int nmb2=(temperatur/10)%10;
+    int nmb1 = temperatur%10;
+    int nmb2 = (temperatur/10)%10;
     printNmbOnScreen(temperatur%10, true);
     printNmbOnScreen((temperatur/10)%10, false);
   }
-  else{
+  else {
     printNmbOnScreen(temperatur, false);
   }
 
-  //wait till delTimee is over to check the temp
-  int a=millis();
-  if(a-b>delTime){
-    int waterTempInt=printTemperature(insideThermometer);
-    temperatur=waterTempInt;
-    b+=delTime;
+  //wait till delTime is over to check the temp
+  int a = millis();
+  if (a-b > delTime) {
+    int waterTempInt = printTemperature(insideThermometer);
+    temperatur = waterTempInt;
+    b += delTime;
   }
 
 
   //turn on/off the vent
-  if (temperatur>kippunkt){  // error
-    digitalWrite(rele,HIGH);
+  if (
+    ((temperatur > kippunkt) && !coolerStopped) ||
+    ((temperatur > (kippunkt + 1)) && coolerStopped)
+  ) {  // error
+    digitalWrite(rele, HIGH);
+    coolerStopped = false;
     Serial.println("Rele is open");
   }
-  else{
-    digitalWrite(rele,LOW);
+  else {
+    digitalWrite(rele, LOW);
+    coolerStopped = true;
     Serial.println("Rele is closed");
   }
 }
@@ -187,304 +196,304 @@ void printNmbOnScreen(int nmb, boolean secNmb){
   }
   switch (nmb){
     case 0:
-      SelectRow(1);
-      SelectColumn(1+aditionalSpaceForNmb);
-      SelectColumn(2+aditionalSpaceForNmb);
-      SelectColumn(3+aditionalSpaceForNmb);
+      selectRow(1);
+      selectColumn(1+aditionalSpaceForNmb);
+      selectColumn(2+aditionalSpaceForNmb);
+      selectColumn(3+aditionalSpaceForNmb);
       delay(1);
       eraseScreen();
-      SelectRow(2);
-      SelectColumn(1+aditionalSpaceForNmb);
-      SelectColumn(3+aditionalSpaceForNmb);
+      selectRow(2);
+      selectColumn(1+aditionalSpaceForNmb);
+      selectColumn(3+aditionalSpaceForNmb);
       delay(1);
       eraseScreen();
-      SelectRow(3);
-      SelectColumn(1+aditionalSpaceForNmb);
-      SelectColumn(3+aditionalSpaceForNmb);
+      selectRow(3);
+      selectColumn(1+aditionalSpaceForNmb);
+      selectColumn(3+aditionalSpaceForNmb);
       delay(1);
       eraseScreen();
-      SelectRow(4);
-      SelectColumn(1+aditionalSpaceForNmb);
-      SelectColumn(3+aditionalSpaceForNmb);
+      selectRow(4);
+      selectColumn(1+aditionalSpaceForNmb);
+      selectColumn(3+aditionalSpaceForNmb);
       delay(1);
       eraseScreen();
-      SelectRow(5);
-      SelectColumn(1+aditionalSpaceForNmb);
-      SelectColumn(2+aditionalSpaceForNmb);
-      SelectColumn(3+aditionalSpaceForNmb);
+      selectRow(5);
+      selectColumn(1+aditionalSpaceForNmb);
+      selectColumn(2+aditionalSpaceForNmb);
+      selectColumn(3+aditionalSpaceForNmb);
       delay(1);
       eraseScreen();
       break;
     case 1:
-      SelectRow(1);
-      SelectColumn(3+aditionalSpaceForNmb);
+      selectRow(1);
+      selectColumn(3+aditionalSpaceForNmb);
       delay(1);
       eraseScreen();
-      SelectRow(2);
-      SelectColumn(3+aditionalSpaceForNmb);
+      selectRow(2);
+      selectColumn(3+aditionalSpaceForNmb);
       delay(1);
       eraseScreen();
-      SelectRow(3);
-      SelectColumn(3+aditionalSpaceForNmb);
+      selectRow(3);
+      selectColumn(3+aditionalSpaceForNmb);
       delay(1);
       eraseScreen();
-      SelectRow(4);
-      SelectColumn(3+aditionalSpaceForNmb);
+      selectRow(4);
+      selectColumn(3+aditionalSpaceForNmb);
       delay(1);
       eraseScreen();
-      SelectRow(5);
-      SelectColumn(3+aditionalSpaceForNmb);
+      selectRow(5);
+      selectColumn(3+aditionalSpaceForNmb);
       delay(1);
       eraseScreen();
       break;
     case 2:
-      SelectRow(1);
-      SelectColumn(1+aditionalSpaceForNmb);
-      SelectColumn(2+aditionalSpaceForNmb);
-      SelectColumn(3+aditionalSpaceForNmb);
+      selectRow(1);
+      selectColumn(1+aditionalSpaceForNmb);
+      selectColumn(2+aditionalSpaceForNmb);
+      selectColumn(3+aditionalSpaceForNmb);
       delay(1);
       eraseScreen();
       
-      SelectRow(2);
-      SelectColumn(3+aditionalSpaceForNmb);
+      selectRow(2);
+      selectColumn(3+aditionalSpaceForNmb);
       delay(1);
       eraseScreen();
       
-      SelectRow(3);
-      SelectColumn(1+aditionalSpaceForNmb);
-      SelectColumn(2+aditionalSpaceForNmb);
-      SelectColumn(3+aditionalSpaceForNmb);
+      selectRow(3);
+      selectColumn(1+aditionalSpaceForNmb);
+      selectColumn(2+aditionalSpaceForNmb);
+      selectColumn(3+aditionalSpaceForNmb);
       delay(1);
       eraseScreen();
       
-      SelectRow(4);
-      SelectColumn(1+aditionalSpaceForNmb);
+      selectRow(4);
+      selectColumn(1+aditionalSpaceForNmb);
       delay(1);
       eraseScreen();
       
-      SelectRow(5);
-      SelectColumn(1+aditionalSpaceForNmb);
-      SelectColumn(2+aditionalSpaceForNmb);
-      SelectColumn(3+aditionalSpaceForNmb);
+      selectRow(5);
+      selectColumn(1+aditionalSpaceForNmb);
+      selectColumn(2+aditionalSpaceForNmb);
+      selectColumn(3+aditionalSpaceForNmb);
       delay(1);
       eraseScreen();
       break;
     case 3:
-      SelectRow(1);
-      SelectColumn(1+aditionalSpaceForNmb);
-      SelectColumn(2+aditionalSpaceForNmb);
-      SelectColumn(3+aditionalSpaceForNmb);
+      selectRow(1);
+      selectColumn(1+aditionalSpaceForNmb);
+      selectColumn(2+aditionalSpaceForNmb);
+      selectColumn(3+aditionalSpaceForNmb);
       delay(1);
       eraseScreen();
-      SelectRow(2);
-      SelectColumn(3+aditionalSpaceForNmb);
+      selectRow(2);
+      selectColumn(3+aditionalSpaceForNmb);
       delay(1);
       eraseScreen();
-      SelectRow(3);
-      SelectColumn(1+aditionalSpaceForNmb);
-      SelectColumn(2+aditionalSpaceForNmb);
-      SelectColumn(3+aditionalSpaceForNmb);
+      selectRow(3);
+      selectColumn(1+aditionalSpaceForNmb);
+      selectColumn(2+aditionalSpaceForNmb);
+      selectColumn(3+aditionalSpaceForNmb);
       delay(1);
       eraseScreen();
-      SelectRow(4);
-      SelectColumn(3+aditionalSpaceForNmb);
+      selectRow(4);
+      selectColumn(3+aditionalSpaceForNmb);
       delay(1);
       eraseScreen();
-      SelectRow(5);
-      SelectColumn(1+aditionalSpaceForNmb);
-      SelectColumn(2+aditionalSpaceForNmb);
-      SelectColumn(3+aditionalSpaceForNmb);
+      selectRow(5);
+      selectColumn(1+aditionalSpaceForNmb);
+      selectColumn(2+aditionalSpaceForNmb);
+      selectColumn(3+aditionalSpaceForNmb);
       delay(1);
       eraseScreen();
       break;
     case 4:
-      SelectRow(1);
-      SelectColumn(1+aditionalSpaceForNmb);
-      SelectColumn(3+aditionalSpaceForNmb);
+      selectRow(1);
+      selectColumn(1+aditionalSpaceForNmb);
+      selectColumn(3+aditionalSpaceForNmb);
       delay(1);
       eraseScreen();
       
-      SelectRow(2);
-      SelectColumn(1+aditionalSpaceForNmb);
-      SelectColumn(3+aditionalSpaceForNmb);
+      selectRow(2);
+      selectColumn(1+aditionalSpaceForNmb);
+      selectColumn(3+aditionalSpaceForNmb);
       delay(1);
       eraseScreen();
       
-      SelectRow(3);
-      SelectColumn(1+aditionalSpaceForNmb);
-      SelectColumn(2+aditionalSpaceForNmb);
-      SelectColumn(3+aditionalSpaceForNmb);
+      selectRow(3);
+      selectColumn(1+aditionalSpaceForNmb);
+      selectColumn(2+aditionalSpaceForNmb);
+      selectColumn(3+aditionalSpaceForNmb);
       delay(1);
       eraseScreen();
       
-      SelectRow(4);
-      SelectColumn(3+aditionalSpaceForNmb);
+      selectRow(4);
+      selectColumn(3+aditionalSpaceForNmb);
       delay(1);
       eraseScreen();
       
-      SelectRow(5);
-      SelectColumn(3+aditionalSpaceForNmb);
+      selectRow(5);
+      selectColumn(3+aditionalSpaceForNmb);
       delay(1);
       eraseScreen();
       break;
     case 5:
-      SelectRow(1);
-      SelectColumn(1+aditionalSpaceForNmb);
-      SelectColumn(2+aditionalSpaceForNmb);
-      SelectColumn(3+aditionalSpaceForNmb);
+      selectRow(1);
+      selectColumn(1+aditionalSpaceForNmb);
+      selectColumn(2+aditionalSpaceForNmb);
+      selectColumn(3+aditionalSpaceForNmb);
       delay(1);
       eraseScreen();
       
-      SelectRow(2);
-      SelectColumn(1+aditionalSpaceForNmb);
+      selectRow(2);
+      selectColumn(1+aditionalSpaceForNmb);
       delay(1);
       eraseScreen();
       
-      SelectRow(3);
-      SelectColumn(1+aditionalSpaceForNmb);
-      SelectColumn(2+aditionalSpaceForNmb);
-      SelectColumn(3+aditionalSpaceForNmb);
+      selectRow(3);
+      selectColumn(1+aditionalSpaceForNmb);
+      selectColumn(2+aditionalSpaceForNmb);
+      selectColumn(3+aditionalSpaceForNmb);
       delay(1);
       eraseScreen();
       
-      SelectRow(4);
-      SelectColumn(3+aditionalSpaceForNmb);
+      selectRow(4);
+      selectColumn(3+aditionalSpaceForNmb);
       delay(1);
       eraseScreen();
       
-      SelectRow(5);
-      SelectColumn(1+aditionalSpaceForNmb);
-      SelectColumn(2+aditionalSpaceForNmb);
-      SelectColumn(3+aditionalSpaceForNmb);
+      selectRow(5);
+      selectColumn(1+aditionalSpaceForNmb);
+      selectColumn(2+aditionalSpaceForNmb);
+      selectColumn(3+aditionalSpaceForNmb);
       delay(1);
       eraseScreen();
       break;
     case 6:
-      SelectRow(1);
-      SelectColumn(1+aditionalSpaceForNmb);
-      SelectColumn(2+aditionalSpaceForNmb);
-      SelectColumn(3+aditionalSpaceForNmb);
+      selectRow(1);
+      selectColumn(1+aditionalSpaceForNmb);
+      selectColumn(2+aditionalSpaceForNmb);
+      selectColumn(3+aditionalSpaceForNmb);
       delay(1);
       eraseScreen();
       
-      SelectRow(2);
-      SelectColumn(1+aditionalSpaceForNmb);
+      selectRow(2);
+      selectColumn(1+aditionalSpaceForNmb);
       delay(1);
       eraseScreen();
       
-      SelectRow(3);
-      SelectColumn(1+aditionalSpaceForNmb);
-      SelectColumn(2+aditionalSpaceForNmb);
-      SelectColumn(3+aditionalSpaceForNmb);
+      selectRow(3);
+      selectColumn(1+aditionalSpaceForNmb);
+      selectColumn(2+aditionalSpaceForNmb);
+      selectColumn(3+aditionalSpaceForNmb);
       delay(1);
       eraseScreen();
       
-      SelectRow(4);
-      SelectColumn(1+aditionalSpaceForNmb);
-      SelectColumn(3+aditionalSpaceForNmb);
+      selectRow(4);
+      selectColumn(1+aditionalSpaceForNmb);
+      selectColumn(3+aditionalSpaceForNmb);
       delay(1);
       eraseScreen();
       
-      SelectRow(5);
-      SelectColumn(1+aditionalSpaceForNmb);
-      SelectColumn(2+aditionalSpaceForNmb);
-      SelectColumn(3+aditionalSpaceForNmb);
+      selectRow(5);
+      selectColumn(1+aditionalSpaceForNmb);
+      selectColumn(2+aditionalSpaceForNmb);
+      selectColumn(3+aditionalSpaceForNmb);
       delay(1);
       eraseScreen();
       break;
     case 7:
-      SelectRow(1);
-      SelectColumn(1+aditionalSpaceForNmb);
-      SelectColumn(2+aditionalSpaceForNmb);
-      SelectColumn(3+aditionalSpaceForNmb);
+      selectRow(1);
+      selectColumn(1+aditionalSpaceForNmb);
+      selectColumn(2+aditionalSpaceForNmb);
+      selectColumn(3+aditionalSpaceForNmb);
       delay(1);
       eraseScreen();
       
-      SelectRow(2);
-      SelectColumn(3+aditionalSpaceForNmb);
+      selectRow(2);
+      selectColumn(3+aditionalSpaceForNmb);
       delay(1);
       eraseScreen();
       
-      SelectRow(3);
-      SelectColumn(2+aditionalSpaceForNmb);
-      SelectColumn(3+aditionalSpaceForNmb);
+      selectRow(3);
+      selectColumn(2+aditionalSpaceForNmb);
+      selectColumn(3+aditionalSpaceForNmb);
       delay(1);
       eraseScreen();
       
-      SelectRow(4);
-      SelectColumn(3+aditionalSpaceForNmb);
+      selectRow(4);
+      selectColumn(3+aditionalSpaceForNmb);
       delay(1);
       eraseScreen();
       
-      SelectRow(5);
-      SelectColumn(3+aditionalSpaceForNmb);
+      selectRow(5);
+      selectColumn(3+aditionalSpaceForNmb);
       delay(1);
       eraseScreen();
       break;
     case 8:
-      SelectRow(1);
-      SelectColumn(1+aditionalSpaceForNmb);
-      SelectColumn(2+aditionalSpaceForNmb);
-      SelectColumn(3+aditionalSpaceForNmb);
+      selectRow(1);
+      selectColumn(1+aditionalSpaceForNmb);
+      selectColumn(2+aditionalSpaceForNmb);
+      selectColumn(3+aditionalSpaceForNmb);
       delay(1);
       eraseScreen();
       
-      SelectRow(2);
-      SelectColumn(1+aditionalSpaceForNmb);
-      SelectColumn(3+aditionalSpaceForNmb);
+      selectRow(2);
+      selectColumn(1+aditionalSpaceForNmb);
+      selectColumn(3+aditionalSpaceForNmb);
       delay(1);
       eraseScreen();
       
-      SelectRow(3);
-      SelectColumn(1+aditionalSpaceForNmb);
-      SelectColumn(2+aditionalSpaceForNmb);
-      SelectColumn(3+aditionalSpaceForNmb);
+      selectRow(3);
+      selectColumn(1+aditionalSpaceForNmb);
+      selectColumn(2+aditionalSpaceForNmb);
+      selectColumn(3+aditionalSpaceForNmb);
       delay(1);
       eraseScreen();
       
-      SelectRow(4);
-      SelectColumn(1+aditionalSpaceForNmb);
-      SelectColumn(3+aditionalSpaceForNmb);
+      selectRow(4);
+      selectColumn(1+aditionalSpaceForNmb);
+      selectColumn(3+aditionalSpaceForNmb);
       delay(1);
       eraseScreen();
       
-      SelectRow(5);
-      SelectColumn(1+aditionalSpaceForNmb);
-      SelectColumn(2+aditionalSpaceForNmb);
-      SelectColumn(3+aditionalSpaceForNmb);
+      selectRow(5);
+      selectColumn(1+aditionalSpaceForNmb);
+      selectColumn(2+aditionalSpaceForNmb);
+      selectColumn(3+aditionalSpaceForNmb);
       delay(1);
       eraseScreen();
       break;
     case 9:
-      SelectRow(1);
-      SelectColumn(1+aditionalSpaceForNmb);
-      SelectColumn(2+aditionalSpaceForNmb);
-      SelectColumn(3+aditionalSpaceForNmb);
+      selectRow(1);
+      selectColumn(1+aditionalSpaceForNmb);
+      selectColumn(2+aditionalSpaceForNmb);
+      selectColumn(3+aditionalSpaceForNmb);
       delay(1);
       eraseScreen();
       
-      SelectRow(2);
-      SelectColumn(1+aditionalSpaceForNmb);
-      SelectColumn(3+aditionalSpaceForNmb);
+      selectRow(2);
+      selectColumn(1+aditionalSpaceForNmb);
+      selectColumn(3+aditionalSpaceForNmb);
       delay(1);
       eraseScreen();
       
-      SelectRow(3);
-      SelectColumn(1+aditionalSpaceForNmb);
-      SelectColumn(2+aditionalSpaceForNmb);
-      SelectColumn(3+aditionalSpaceForNmb);
+      selectRow(3);
+      selectColumn(1+aditionalSpaceForNmb);
+      selectColumn(2+aditionalSpaceForNmb);
+      selectColumn(3+aditionalSpaceForNmb);
       delay(1);
       eraseScreen();
       
-      SelectRow(4);
-      SelectColumn(3+aditionalSpaceForNmb);
+      selectRow(4);
+      selectColumn(3+aditionalSpaceForNmb);
       delay(1);
       eraseScreen();
       
-      SelectRow(5);
-      SelectColumn(1+aditionalSpaceForNmb);
-      SelectColumn(2+aditionalSpaceForNmb);
-      SelectColumn(3+aditionalSpaceForNmb);
+      selectRow(5);
+      selectColumn(1+aditionalSpaceForNmb);
+      selectColumn(2+aditionalSpaceForNmb);
+      selectColumn(3+aditionalSpaceForNmb);
       delay(1);
       eraseScreen();
       break;
