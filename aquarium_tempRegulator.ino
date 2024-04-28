@@ -35,7 +35,7 @@ int temperatur=0;
 
 int b=0;
 
-int delTime=60000; // one minute 
+int delTime=10000; // 10 seconds
 
 
 //output for rele
